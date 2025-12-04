@@ -3,12 +3,22 @@ Final_Project/
 │
 ├── .gitignore                          # Git ignore rules
 ├── requirements.txt                    # Python dependencies
+├── README.md                           # This file
+│
+├── config.py                           # Configuration constants and hyperparameters
+├── model.py                            # IlluminantCNN model definition
+├── data_loader.py                      # Data loading utilities and transforms
+│
+├── train.py                            # Training script
+├── evaluate.py                         # Evaluation script for test set
+├── gradcam.py                          # Grad-CAM visualization script
+├── illuminant_estimator.py            # Continuous illuminant estimation
 │
 ├── augment_split_data.py               # Data augmentation and train/val/test splitting
 ├── visualize_image.py                  # Image visualization tool (CLI)
 │
 ├── illuminant_eda.ipynb                # Exploratory Data Analysis notebook
-├── training.ipynb                      # Model training and evaluation notebook
+├── training.ipynb                      # Original training notebook (reference)
 │
 ├── cluster_centers.npy                 # Saved cluster centers (generated from EDA)
 │
@@ -18,9 +28,9 @@ Final_Project/
 │   │   ├── field_3_cameras/
 │   │   ├── lab_printouts/
 │   │   └── lab_realscene/
-│   │       ├── *.tiff                # Image files
-│   │       └── *.wp                   # White point files
-│   └── info/                          # Camera characterization data
+│   │       ├── *.tiff                  # Image files
+│   │       └── *.wp                    # White point files
+│   └── info/                           # Camera characterization data
 │       ├── Info/
 │       │   ├── reference_wps_ccms_nikond810.mat
 │       │   └── ...
@@ -39,14 +49,11 @@ Final_Project/
 │   └── test/
 │       └── [same structure as train]
 │
-├── visualizations/                     # Generated visualizations (excluded from git)
-│   ├── gradcam_grid_all_classes.png
-│   ├── confusion_matrix.png
-│   └── ...
-│
-├── gradcam_heatmaps/                   # GradCAM outputs (excluded from git)
-│   └── ...
-│
-└── new_venv/                          # Virtual environment (excluded from git)
+└── visualizations/                     # Generated visualizations (excluded from git)
+    ├── training_curves.png
+    ├── confusion_matrix.png
+    ├── gradcam_grid_all_classes.png
+    ├── illuminant_estimation_results.png
+    ├── illuminant_examples.png
     └── ...
 ```
