@@ -23,6 +23,7 @@ new_venv/
 Data/
 dataset/
 augmented_dataset/
+LSMI_Test_Package/
 
 # Model files (large)
 *.pth
@@ -30,6 +31,7 @@ augmented_dataset/
 *.h5
 *.ckpt
 *.pt
+*.zip
 
 # Generated outputs
 visualizations/
