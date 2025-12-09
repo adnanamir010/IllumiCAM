@@ -261,7 +261,7 @@ def generate_heatmaps(model_type, cam_method, layer_name, image_path):
                     grayscale_cam = cam(input_tensor=img_tensor, targets=targets)[0]
             heatmap = grayscale_cam
             
-            # Force min-max normalization to match apply_ccm_with_cam.py
+            # Force min-max normalization to match correct_with_cam.py
             # This ensures even weak activations are visualized with full dynamic range
             mn, mx = heatmap.min(), heatmap.max()
             if mx - mn > 1e-8:
