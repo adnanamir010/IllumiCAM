@@ -62,6 +62,8 @@ Final_Project/
 ├── Data/
 │   ├── Nikon_D810/                      # Raw illuminant data
 │   ├── LSMI/                            # LSMI test dataset (RAW)
+│   │   ├── nikon/                       # Nikon subset of LSMI
+│   │   └── masks/                       # Generated masks for all images
 │   ├── LSMI_Test_Package/               # LSMI preprocessed
 │   │   ├── images/                      # NEF test images
 │   │   └── masks/                       # Ground truth masks (.npy)
