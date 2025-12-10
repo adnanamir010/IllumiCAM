@@ -1,3 +1,12 @@
+"""
+Sara Spasojevic, Adnan Amir, Ritik Bompilwar
+CS7180 Final Project, Fall 2025
+December 9, 2025
+
+Color Constancy CNN paper model implementation.
+Uses AlexNet architecture with custom classifier layers.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

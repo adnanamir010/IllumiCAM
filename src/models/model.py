@@ -1,4 +1,8 @@
 """
+Sara Spasojevic, Adnan Amir, Ritik Bompilwar
+CS7180 Final Project, Fall 2025
+December 9, 2025
+
 Custom CNN model for illuminant estimation.
 """
 
