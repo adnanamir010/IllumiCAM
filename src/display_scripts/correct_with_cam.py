@@ -110,9 +110,15 @@ def get_ccms_for_clusters(illum_wps3, illum_ccms, illum_names):
     return cluster_ccms
 
 # ---------- Raw correction ----------
-def apply_correction(raw_img, wp, ccm):
+def apply_correction(raw_img, wp, ccm, use_ccm=True):
     """
-    Apply WB and CCM to linear raw image.
+    Apply WB and optionally CCM to linear raw image.
+    
+    Args:
+        raw_img: Linear raw image
+        wp: White point (3-vector)
+        ccm: Color correction matrix (3x3)
+        use_ccm: If True, apply CCM after WB. If False, use WB only.
     """
     raw = raw_img.astype(np.float32)
 
@@ -125,11 +131,14 @@ def apply_correction(raw_img, wp, ccm):
     wb = raw / (wp_norm[None, None, :] + 1e-12)
     wb = np.clip(wb, 0.0, None)
 
-    # Apply CCM
-    h, w, _ = wb.shape
-    rendered = wb.reshape(-1, 3) @ ccm.T
-    rendered = rendered.reshape(h, w, 3)
-    rendered = np.clip(rendered, 0.0, None)
+    # Apply CCM if requested
+    if use_ccm:
+        h, w, _ = wb.shape
+        rendered = wb.reshape(-1, 3) @ ccm.T
+        rendered = rendered.reshape(h, w, 3)
+        rendered = np.clip(rendered, 0.0, None)
+    else:
+        rendered = wb
 
     # Scale to [0,1] using percentile
     pmax = np.percentile(rendered, 99.5)
@@ -196,6 +205,7 @@ def main():
     parser.add_argument('--threshold', type=float, default=0.10, help='Per-pixel threshold on softmax weight to consider a cluster "used" (default: 0.10)')
     parser.add_argument('--smooth_ksize', type=int, default=41, help='Gaussian blur kernel size for smoothing CAM masks (odd)')
     parser.add_argument('--temp', type=float, default=0.7, help='Softmax temperature (lower -> sharper selection).')
+    parser.add_argument('--use-ccm', action='store_true', help='Apply CCM correction after white balance (default: WB only)')
     parser.add_argument('--debug', action='store_true', help='Save extra debug images')
     args = parser.parse_args()
 
@@ -293,10 +303,11 @@ def main():
 
     # 8) Precompute corrected images per cluster
     corrected_per_cluster = {}
+    use_ccm = args.use_ccm
     for name in TRAIN_LABELS:
         wp = cluster_mapping[name]['wp']
         ccm = cluster_mapping[name]['ccm']
-        corrected_per_cluster[name] = apply_correction(raw_linear, wp, ccm)
+        corrected_per_cluster[name] = apply_correction(raw_linear, wp, ccm, use_ccm=use_ccm)
 
     # Compute base correction (predicted class)
     base_correction = corrected_per_cluster[pred_class]
@@ -338,14 +349,16 @@ def main():
     ax.set_title("Original (Raw Linear)")
     ax.axis('off')
 
+    correction_type = "WB + CCM" if args.use_ccm else "WB Only"
+    
     ax = plt.subplot(rows, cols, 2)
     ax.imshow(final_srgb)
-    ax.set_title(f"Final Corrected (base: {pred_class})")
+    ax.set_title(f"Final Corrected ({correction_type})\nbase: {pred_class}")
     ax.axis('off')
 
     ax = plt.subplot(rows, cols, 3)
     ax.imshow(base_srgb)
-    ax.set_title("Base Correction (pred/fallback)")
+    ax.set_title(f"Base Correction ({correction_type})\n(pred/fallback)")
     ax.axis('off')
 
     # Bottom row: show the used CAM heatmaps and their max weights
@@ -356,7 +369,8 @@ def main():
         ax.set_title(f"CAM: {name}\nmaxW={cluster_max_weights[name]:.3f}")
         ax.axis('off')
 
-    out_path = os.path.join(args.output, f"{img_name}_corrected.png")
+    correction_suffix = "wb_ccm" if args.use_ccm else "wb_only"
+    out_path = os.path.join(args.output, f"{img_name}_corrected_{correction_suffix}.png")
     plt.tight_layout()
     plt.savefig(out_path, dpi=150)
     plt.close()
@@ -378,6 +392,7 @@ def main():
 
     # Print summary of what was used
     print("Summary:")
+    print(f"  Correction mode: {'White Balance + CCM' if args.use_ccm else 'White Balance Only'}")
     print(f"  Predicted class: {pred_class}")
     print(f"  Clusters with max softmax >= {args.threshold:.2f}: {sorted(list(used_clusters))}")
     print("Done.")
